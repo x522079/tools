@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.tools.controller.MainController"
+      stylesheets="@styles.css">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <TabPane VBox.vgrow="ALWAYS">
+        <Tab text="JSON格式化" closable="false">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="10" bottom="10" left="10" right="10"/>
+                </padding>
+                
+                <VBox VBox.vgrow="SOMETIMES" spacing="10">
+                    <Label text="输入 JSON" style="-fx-font-size: 14px;"/>
+                    <TextArea fx:id="jsonInput" 
+                             promptText="在此输入JSON文本..." 
+                             VBox.vgrow="ALWAYS" 
+                             wrapText="true"
+                             styleClass="json-input"/>
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button text="格式化" onAction="#formatJson"
+                                style="-fx-font-size: 14px;"
+                                minWidth="80"/>
+                        <Button text="压缩" onAction="#compressJson"
+                                style="-fx-font-size: 14px;"
+                                minWidth="80"/>
+                        <padding>
+                            <Insets top="5.0" bottom="5.0"/>
+                        </padding>
+                    </HBox>
+                </VBox>
+                
+                <VBox VBox.vgrow="ALWAYS" spacing="10">
+                    <Label text="格式化结果" style="-fx-font-size: 14px;"/>
+                    <TextArea fx:id="jsonOutput" 
+                             promptText="格式化后的结果将显示在这里..." 
+                             VBox.vgrow="ALWAYS" 
+                             wrapText="true"
+                             styleClass="json-output"
+                             editable="false"/>
+                </VBox>
+            </VBox>
+        </Tab>
+        
+        <Tab text="Base64" closable="false">
+            <VBox spacing="10">
+                <VBox VBox.vgrow="SOMETIMES" spacing="10">
+                    <TextArea fx:id="base64Input" promptText="在此输入要编码/解码的文本..." 
+                             VBox.vgrow="ALWAYS" wrapText="true"/>
+                    <HBox spacing="10" alignment="CENTER">
+                        <Button text="编码" onAction="#encodeBase64"/>
+                        <Button text="解码" onAction="#decodeBase64"/>
+                        <padding>
+                            <Insets top="5.0" bottom="5.0"/>
+                        </padding>
+                    </HBox>
+                </VBox>
+                <TextArea fx:id="base64Output" promptText="编码/解码结果将显示在这里..." 
+                         VBox.vgrow="ALWAYS" wrapText="true"/>
+            </VBox>
+        </Tab>
+        
+        <Tab text="URL编解码" closable="false">
+            <VBox spacing="10">
+                <VBox VBox.vgrow="SOMETIMES" spacing="10">
+                    <TextArea fx:id="urlInput" promptText="在此输入要编码/解码的URL..." 
+                             VBox.vgrow="ALWAYS" wrapText="true"/>
+                    <HBox spacing="10" alignment="CENTER">
+                        <Button text="编码" onAction="#encodeUrl"/>
+                        <Button text="解码" onAction="#decodeUrl"/>
+                        <padding>
+                            <Insets top="5.0" bottom="5.0"/>
+                        </padding>
+                    </HBox>
+                </VBox>
+                <TextArea fx:id="urlOutput" promptText="编码/解码结果将显示在这里..." 
+                         VBox.vgrow="ALWAYS" wrapText="true"/>
+            </VBox>
+        </Tab>
+        
+        <Tab text="时间差计算" closable="false">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="10" bottom="10" left="10" right="10"/>
+                </padding>
+                
+                <HBox spacing="15" alignment="CENTER">
+                    <VBox spacing="5">
+                        <Label text="开始时间"/>
+                        <TextField fx:id="startTimeInput" 
+                                 prefWidth="200" 
+                                 promptText="yyyy-MM-dd HH:mm:ss"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text="结束时间"/>
+                        <TextField fx:id="endTimeInput" 
+                                 prefWidth="200" 
+                                 promptText="yyyy-MM-dd HH:mm:ss"/>
+                    </VBox>
+                    <Button text="计算" onAction="#calculateTime" 
+                            style="-fx-font-size: 14px;"
+                            minWidth="80"/>
+                </HBox>
+                
+                <TableView fx:id="timeResultTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn text="选择" fx:id="selectColumn" prefWidth="60" style="-fx-alignment: CENTER"/>
+                        <TableColumn text="开始时间" fx:id="startTimeColumn" prefWidth="220" style="-fx-alignment: CENTER"/>
+                        <TableColumn text="��束时间" fx:id="endTimeColumn" prefWidth="220" style="-fx-alignment: CENTER"/>
+                        <TableColumn text="时间差" fx:id="resultColumn" prefWidth="180" style="-fx-alignment: CENTER"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="暂无计算结果"/>
+                    </placeholder>
+                </TableView>
+                
+                <HBox spacing="15" alignment="CENTER">
+                    <padding>
+                        <Insets top="5" bottom="5"/>
+                    </padding>
+                    <Label text="选中项合计：" style="-fx-font-size: 14px;"/>
+                    <Label fx:id="totalTimeLabel" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="清空记录" onAction="#clearTimeCalculations" 
+                            style="-fx-font-size: 14px;"/>
+                </HBox>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox> 
