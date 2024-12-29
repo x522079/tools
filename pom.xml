@@ -325,21 +325,63 @@
                         </goals>
                         <configuration>
                             <target>
-                                <!-- 创建启动脚本 -->
-                                <echo file="${project.build.directory}/start.bat">@echo off
+                                <!-- 创建发布目录 -->
+                                <mkdir dir="${project.build.directory}/release"/>
+                                <mkdir dir="${project.build.directory}/release/lib"/>
+                                
+                                <!-- 复制主程序 -->
+                                <copy file="${project.build.directory}/DevTools.jar" 
+                                      todir="${project.build.directory}/release"/>
+
+                                <!-- 使用正确的条件语法 -->
+                                <condition property="isWindows">
+                                    <os family="windows"/>
+                                </condition>
+                                
+                                <!-- Windows 启动脚本 -->
+                                <echo file="${project.build.directory}/release/start.bat">@echo off
 setlocal
 set "JAVA_OPTS=--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --module-path lib"
 java %JAVA_OPTS% -jar DevTools.jar
 pause</echo>
                                 
-                                <!-- 创建目录结构 -->
-                                <mkdir dir="${project.build.directory}/release"/>
-                                <mkdir dir="${project.build.directory}/release/lib"/>
+                                <!-- Unix 启动脚本 -->
+                                <echo file="${project.build.directory}/release/start.sh">#!/bin/bash
+JAVA_OPTS="--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --module-path lib"
+java $JAVA_OPTS -jar DevTools.jar</echo>
                                 
-                                <!-- 复制文件 -->
-                                <copy file="${project.build.directory}/DevTools.jar" todir="${project.build.directory}/release"/>
-                                <copy file="${project.build.directory}/start.bat" todir="${project.build.directory}/release"/>
+                                <!-- Unix 脚本权限 -->
+                                <chmod file="${project.build.directory}/release/start.sh" perm="755"/>
+                                
+                                <!-- 创建简单说明文件 -->
+                                <echo file="${project.build.directory}/release/README.txt">开发工具集
+
+运行要求：
+1. 安装 JDK 21 或更高版本
+2. 设置 JAVA_HOME 环境变量
+
+运行方式：
+Windows: 双击 start.bat
+Unix: ./start.sh</echo>
                             </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/release/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
                 </executions>
