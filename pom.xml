@@ -206,17 +206,13 @@
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
             <version>11.2.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.dlsc.formsfx</groupId>
             <artifactId>formsfx-core</artifactId>
             <version>11.6.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.synedra</groupId>
@@ -287,7 +283,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>23</release>
+                    <release>21</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -301,6 +297,21 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/LICENSE</exclude>
+                                        <exclude>META-INF/NOTICE</exclude>
+                                        <exclude>META-INF/DEPENDENCIES</exclude>
+                                        <exclude>META-INF/substrate/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.example.tools.Launcher</mainClass>
@@ -311,6 +322,18 @@
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>9.6</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm-commons</artifactId>
+                        <version>9.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -341,8 +364,14 @@
                                 <!-- Windows 启动脚本 -->
                                 <echo file="${project.build.directory}/release/start.bat">@echo off
 setlocal
-set "JAVA_OPTS=--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --module-path lib"
-java %JAVA_OPTS% -jar DevTools.jar
+set "SCRIPT_DIR=%~dp0"
+set "MODULE_PATH=%SCRIPT_DIR%lib"
+set "JAVAFX_MODULES=javafx.controls,javafx.fxml,javafx.web,javafx.graphics"
+
+java --module-path "%MODULE_PATH%" ^
+     --add-modules %JAVAFX_MODULES% ^
+     --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED ^
+     -jar "%SCRIPT_DIR%DevTools.jar"
 pause</echo>
                                 
                                 <!-- Unix 启动脚本 -->
@@ -358,8 +387,19 @@ else
     JAVA_CMD="java"
 fi
 
-JAVA_OPTS="--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --module-path lib"
-"$JAVA_CMD" $JAVA_OPTS -jar DevTools.jar</echo>
+# 设置模块路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &amp;> /dev/null &amp;&amp; pwd)"
+MODULE_PATH="$SCRIPT_DIR/lib"
+
+# JavaFX 模块列表
+JAVAFX_MODULES="javafx.controls,javafx.fxml,javafx.web,javafx.graphics"
+
+# 运行程序
+"$JAVA_CMD" \
+    --module-path "$MODULE_PATH" \
+    --add-modules "$JAVAFX_MODULES" \
+    --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED \
+    -jar "$SCRIPT_DIR/DevTools.jar"</echo>
                                 
                                 <!-- Unix 脚本权限 -->
                                 <chmod file="${project.build.directory}/release/start.sh" perm="755"/>
@@ -405,10 +445,22 @@ Windows 运行方式：
                         <configuration>
                             <outputDirectory>${project.build.directory}/release/lib</outputDirectory>
                             <includeScope>runtime</includeScope>
+                            <excludeGroupIds>org.junit.jupiter,org.junit.platform</excludeGroupIds>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>com/example/tools/**/*.fxml</include>
+                    <include>com/example/tools/**/*.css</include>
+                    <!-- 只包含必要的资源文件 -->
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>
