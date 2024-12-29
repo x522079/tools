@@ -347,8 +347,19 @@ pause</echo>
                                 
                                 <!-- Unix 启动脚本 -->
                                 <echo file="${project.build.directory}/release/start.sh">#!/bin/bash
+
+# 尝试查找 Java
+if [ -n "$JAVA_HOME" ]; then
+    JAVA_CMD="$JAVA_HOME/bin/java"
+elif [ -x "/usr/libexec/java_home" ]; then
+    JAVA_HOME=$(/usr/libexec/java_home -v 21)
+    JAVA_CMD="$JAVA_HOME/bin/java"
+else
+    JAVA_CMD="java"
+fi
+
 JAVA_OPTS="--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --module-path lib"
-java $JAVA_OPTS -jar DevTools.jar</echo>
+"$JAVA_CMD" $JAVA_OPTS -jar DevTools.jar</echo>
                                 
                                 <!-- Unix 脚本权限 -->
                                 <chmod file="${project.build.directory}/release/start.sh" perm="755"/>
@@ -358,11 +369,23 @@ java $JAVA_OPTS -jar DevTools.jar</echo>
 
 运行要求：
 1. 安装 JDK 21 或更高版本
-2. 设置 JAVA_HOME 环境变量
 
-运行方式：
-Windows: 双击 start.bat
-Unix: ./start.sh</echo>
+macOS 安装说明：
+1. 使用 Homebrew 安装 JDK：
+   brew install openjdk@21
+
+2. 创建符号链接：
+   sudo ln -sfn /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk
+
+3. 设置 JAVA_HOME：
+   在 ~/.zshrc 中添加：
+   export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+
+4. 运行程序：
+   ./start.sh
+
+Windows 运行方式：
+双击 start.bat</echo>
                             </target>
                         </configuration>
                     </execution>
