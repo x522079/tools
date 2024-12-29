@@ -71,13 +71,18 @@ public class MainController {
         // 设置表格可编辑
         timeResultTable.setEditable(true);
         
-        // 监听选择变化，更新总时间
-        timeCalculations.addListener((ListChangeListener<TimeCalculation>) c -> updateTotalTime());
-        
-        // 添加对每个项目选中状态变化的监听
-        timeResultTable.getItems().forEach(item -> 
-            item.selectedProperty().addListener((obs, oldVal, newVal) -> updateTotalTime())
-        );
+        // 监听列表变化
+        timeCalculations.addListener((ListChangeListener<TimeCalculation>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    // 为新添加的项目添加选中状态变化监听
+                    c.getAddedSubList().forEach(item -> 
+                        item.selectedProperty().addListener((obs, oldVal, newVal) -> updateTotalTime())
+                    );
+                }
+            }
+            updateTotalTime();
+        });
     }
 
     @FXML
@@ -147,23 +152,38 @@ public class MainController {
     }
 
     @FXML
+    protected void swapTimes() {
+        String startTime = startTimeInput.getText();
+        String endTime = endTimeInput.getText();
+        startTimeInput.setText(endTime);
+        endTimeInput.setText(startTime);
+    }
+
+    @FXML
     protected void calculateTime() {
         try {
             String startTime = startTimeInput.getText();
             String endTime = endTimeInput.getText();
+            
+            // 验证输入不为空
+            if (startTime.isEmpty() || endTime.isEmpty()) {
+                showError("输入错误", "请输入开始时间和结束时间");
+                return;
+            }
+
             Duration duration = timeService.calculateDifference(startTime, endTime);
             String result = timeService.formatDuration(duration);
             
+            // 创建新的计算结果并添加到表格
             TimeCalculation calculation = new TimeCalculation(startTime, endTime, result, duration);
             // 添加对新项目选中状态变化的监听
             calculation.selectedProperty().addListener((obs, oldVal, newVal) -> updateTotalTime());
             timeCalculations.add(calculation);
             
-            // 清空输入框
-            startTimeInput.clear();
-            endTimeInput.clear();
+            // 更新总时间
+            updateTotalTime();
         } catch (Exception e) {
-            showError("时间计算错误", e.getMessage());
+            showError("计算错误", e.getMessage());
         }
     }
 
